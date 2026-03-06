@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pastel Shop Demo</title>
+<style>
+body{
+margin:0;
+font-family:"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+background:linear-gradient(120deg,#fdfbff,#eef3ff);
+color:#333;
+}
+
+header{
+position:sticky;
+top:0;
+background:white;
+box-shadow:0 4px 12px rgba(0,0,0,.08);
+padding:16px 28px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+z-index:10;
+}
+
+.logo{
+font-weight:700;
+font-size:20px;
+color:#6c7bff;
+}
+
+.search{
+padding:8px 12px;
+border-radius:20px;
+border:1px solid #ddd;
+width:200px;
+}
+
+.cart{
+cursor:pointer;
+font-size:18px;
+}
+
+main{
+padding:30px;
+max-width:1200px;
+margin:auto;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:24px;
+}
+
+.card{
+background:white;
+border-radius:16px;
+padding:14px;
+box-shadow:0 8px 18px rgba(0,0,0,.08);
+transition:transform .25s, box-shadow .25s;
+display:flex;
+flex-direction:column;
+}
+
+.card:hover{
+transform:translateY(-6px);
+box-shadow:0 14px 28px rgba(0,0,0,.12);
+}
+
+.image{
+height:150px;
+border-radius:12px;
+background:linear-gradient(135deg,#ffd6ec,#d6e4ff);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:40px;
+}
+
+.title{
+font-weight:600;
+margin-top:10px;
+}
+
+.price{
+color:#ff6aa5;
+margin:6px 0;
+}
+
+button{
+border:none;
+background:#6c7bff;
+color:white;
+padding:8px;
+border-radius:10px;
+cursor:pointer;
+transition:.2s;
+}
+
+button:hover{
+background:#5564ff;
+}
+
+.cartPanel{
+position:fixed;
+right:-380px;
+top:0;
+width:340px;
+height:100%;
+background:white;
+box-shadow:-6px 0 18px rgba(0,0,0,.15);
+padding:20px;
+transition:.35s;
+overflow:auto;
+z-index:20;
+}
+
+.cartPanel.open{
+right:0;
+}
+
+.cartItem{
+display:flex;
+justify-content:space-between;
+margin-bottom:12px;
+font-size:14px;
+}
+
+.total{
+margin-top:20px;
+font-weight:700;
+}
+
+.hero{
+background:linear-gradient(120deg,#e8ecff,#ffeaf5);
+border-radius:20px;
+padding:40px;
+margin-bottom:40px;
+text-align:center;
+animation:fade 1s ease;
+}
+
+@keyframes fade{
+from{opacity:0; transform:translateY(20px);} 
+to{opacity:1; transform:translateY(0);} 
+}
+
+.hero h1{
+margin:0;
+font-size:34px;
+color:#6c7bff;
+}
+
+.hero p{
+color:#666;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">Pastel Shop</div>
+<input class="search" placeholder="検索..." id="search">
+<div class="cart" onclick="toggleCart()">🛒 <span id="cartCount">0</span></div>
+</header>
+
+<div class="cartPanel" id="cartPanel">
+<h2>カート</h2>
+<div id="cartItems"></div>
+<div class="total" id="total"></div>
+</div>
+
+<main>
+
+<div class="hero">
+<h1>ようこそ Pastel Shop</h1>
+<p>かわいい商品を見つけてください ✨</p>
+</div>
+
+<div class="products" id="products"></div>
+
+</main>
+
+<script>
+
+const products=[
+{name:"パステルTシャツ",price:2800,emoji:"👕"},
+{name:"かわいいマグカップ",price:1800,emoji:"☕"},
+{name:"ミニバッグ",price:3200,emoji:"👜"},
+{name:"ノート",price:900,emoji:"📓"},
+{name:"ワイヤレスイヤホン",price:5400,emoji:"🎧"},
+{name:"スマホスタンド",price:1500,emoji:"📱"},
+{name:"キャンドル",price:1200,emoji:"🕯"},
+{name:"キーボード",price:6200,emoji:"⌨️"}
+];
+
+let cart=[];
+
+function renderProducts(list){
+const container=document.getElementById("products");
+container.innerHTML="";
+
+list.forEach((p,i)=>{
+const el=document.createElement("div");
+el.className="card";
+
+el.innerHTML=`
+<div class="image">${p.emoji}</div>
+<div class="title">${p.name}</div>
+<div class="price">¥${p.price}</div>
+<button onclick="addToCart(${i})">カートに追加</button>
+`;
+
+container.appendChild(el);
+});
+}
+
+function addToCart(i){
+cart.push(products[i]);
+updateCart();
+}
+
+function updateCart(){
+const items=document.getElementById("cartItems");
+items.innerHTML="";
+let total=0;
+
+cart.forEach(p=>{
+const div=document.createElement("div");
+div.className="cartItem";
+
+div.innerHTML=`<span>${p.name}</span><span>¥${p.price}</span>`;
+
+items.appendChild(div);
+
+total+=p.price;
+});
+
+document.getElementById("total").innerText="合計: ¥"+total;
+
+document.getElementById("cartCount").innerText=cart.length;
+}
+
+function toggleCart(){
+document.getElementById("cartPanel").classList.toggle("open");
+}
+
+const search=document.getElementById("search");
+
+search.addEventListener("input",()=>{
+const text=search.value;
+const filtered=products.filter(p=>p.name.includes(text));
+renderProducts(filtered);
+});
+
+renderProducts(products);
+
+</script>
+
+</body>
+</html>
